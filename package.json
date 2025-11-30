@@ -1,0 +1,45 @@
+{
+  "name": "passport-citizenid",
+  "version": "1.0.0",
+  "description": "Passport strategy for authenticating with CitizenID using OAuth2 and OpenID Connect",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "passport",
+    "citizenid",
+    "oauth2",
+    "oidc",
+    "openid",
+    "authentication",
+    "auth",
+    "strategy"
+  ],
+  "author": "Arkanis Corporation",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ArkanisCorporation/CitizenId-passport-auth.git"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2",
+    "passport-oauth2": "^1.8.0"
+  },
+  "peerDependencies": {
+    "passport": "^0.6.0 || ^0.7.0"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/node": "^20.10.0",
+    "@types/passport": "^1.0.16",
+    "@types/passport-oauth2": "^1.4.15",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">= 14.0.0"
+  }
+}
