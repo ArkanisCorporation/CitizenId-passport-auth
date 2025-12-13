@@ -7,6 +7,21 @@ import { EventEmitter } from 'events';
 import { Endpoints, getEndpoints, Scopes, AvatarClaimKeys, ALL_AVATAR_CLAIM_KEYS, CUSTOM_CLAIM_PREFIX } from './constants';
 
 /**
+ * Helper function to set error cause (for Node.js 16.9+ compatibility)
+ * @param error - The error to set the cause on
+ * @param cause - The cause of the error
+ */
+function setErrorCause(error: Error, cause: unknown): void {
+  // Node.js Error.cause is available in Node 16.9+, but TypeScript types may not reflect this
+  // Using type assertion for compatibility
+  try {
+    (error as { cause?: unknown }).cause = cause;
+  } catch {
+    // If setting cause fails, ignore (older Node.js versions)
+  }
+}
+
+/**
  * User profile information from Citizen iD.
  */
 export interface CitizenIDProfile {
@@ -204,29 +219,33 @@ export type CitizenIDVerifyFunctionWithRequest<TUser = unknown, TInfo = unknown,
   | ((req: TRequest, accessToken: string, refreshToken: string, profile: CitizenIDProfile, done: PassportDoneCallback<TUser, TInfo>) => void)
   | ((req: TRequest, accessToken: string, refreshToken: string, params: OAuth2TokenParams, profile: CitizenIDProfile, done: PassportDoneCallback<TUser, TInfo>) => void);
 
-/**
- * `Strategy` constructor.
- *
- * The Citizen iD authentication strategy authenticates requests by delegating to
- * Citizen iD using the OAuth 2.0 protocol with OpenID Connect.
- *
- * Applications must supply a `verify` callback which accepts an `accessToken`,
- * `refreshToken` and service-specific `profile`, and then calls the `done`
- * callback supplying a `user`, which should be set to `false` if the
- * credentials are not valid. If an exception occurred, `err` should be set.
- *
- * Options:
- *   - `clientID`          your Citizen iD application's client ID
- *   - `clientSecret`      your Citizen iD application's client secret (optional for public clients)
- *   - `callbackURL`       URL to which Citizen iD will redirect the user after granting authorization
- *   - `scope`             array of permission scopes to request (default: [Scopes.OPENID, Scopes.PROFILE, Scopes.EMAIL])
- *   - `authorizationURL`  URL used to obtain an authorization grant (default: Endpoints.PRODUCTION.AUTHORIZATION)
- *   - `tokenURL`          URL used to obtain an access token (default: Endpoints.PRODUCTION.TOKEN)
- *   - `userInfoURL`       URL used to obtain user info (default: Endpoints.PRODUCTION.USERINFO)
- *   - `pkce`              enable PKCE (default: true)
- *   - `state`             enable state parameter (default: true)
- *
- * Examples:
+  /**
+   * `Strategy` constructor.
+   *
+   * The Citizen iD authentication strategy authenticates requests by delegating to
+   * Citizen iD using the OAuth 2.0 protocol with OpenID Connect.
+   *
+   * Applications must supply a `verify` callback which accepts an `accessToken`,
+   * `refreshToken` and service-specific `profile`, and then calls the `done`
+   * callback supplying a `user`, which should be set to `false` if the
+   * credentials are not valid. If an exception occurred, `err` should be set.
+   *
+   * @param {CitizenIDStrategyOptions} options - Strategy configuration options
+   * @param {CitizenIDVerifyFunction | CitizenIDVerifyFunctionWithRequest} verify - Verify callback function
+   * @throws {Error} If required options are missing or invalid
+   *
+   * Options:
+   *   - `clientID`          your Citizen iD application's client ID (required)
+   *   - `clientSecret`      your Citizen iD application's client secret (optional for public clients)
+   *   - `callbackURL`       URL to which Citizen iD will redirect the user after granting authorization (required)
+   *   - `scope`             array of permission scopes to request (default: [Scopes.OPENID, Scopes.PROFILE, Scopes.EMAIL])
+   *   - `authorizationURL`  URL used to obtain an authorization grant (default: Endpoints.PRODUCTION.AUTHORIZATION)
+   *   - `tokenURL`          URL used to obtain an access token (default: Endpoints.PRODUCTION.TOKEN)
+   *   - `userInfoURL`       URL used to obtain user info (default: Endpoints.PRODUCTION.USERINFO)
+   *   - `pkce`              enable PKCE (default: true)
+   *   - `state`             enable state parameter (default: true)
+   *
+   * Examples:
  *
  *     passport.use(new CitizenIDStrategy({
  *         clientID: 'a3a5953f-8ab0-4d39-a407-d3f0cc9f94da',
@@ -255,6 +274,17 @@ export class Strategy extends OAuth2Strategy {
     options: CitizenIDStrategyOptions,
     verify: CitizenIDVerifyFunction<unknown, unknown> | CitizenIDVerifyFunctionWithRequest<unknown, unknown>
   ) {
+    // Validate required options
+    if (!options.clientID) {
+      throw new Error('CitizenIDStrategy requires a clientID option');
+    }
+    if (!options.callbackURL) {
+      throw new Error('CitizenIDStrategy requires a callbackURL option');
+    }
+    if (!verify || typeof verify !== 'function') {
+      throw new Error('CitizenIDStrategy requires a verify callback function');
+    }
+    
     // Set default options - use production endpoints by default
     // If authorizationURL is provided, try to detect the environment from it
     const providedAuthority = options.authorizationURL 
@@ -317,24 +347,29 @@ export class Strategy extends OAuth2Strategy {
    *   - `_raw`             the raw user info response
    *   - `_json`            the JSON parsed user info
    *
-   * @param {String} accessToken
-   * @param {Function} done
+   * @param {String} accessToken - The OAuth2 access token
+   * @param {Function} done - Callback function (err, profile)
+   * @throws {Error} If the access token is invalid or the profile cannot be retrieved
    * @api protected
    */
   userProfile(accessToken: string, done: (err?: Error | null, profile?: CitizenIDProfile) => void): void {
+    if (!accessToken || typeof accessToken !== 'string') {
+      return done(new Error('Access token is required'));
+    }
     // First, try to decode the ID token if available
     // The ID token is typically returned with the access token
     if (this._idToken) {
       try {
         // Decode without verification (verification should be done server-side if needed)
-        const decoded = jwt.decode(this._idToken) as CitizenIDUserInfo | null;
+        const decoded = jwt.decode(this._idToken, { complete: false }) as CitizenIDUserInfo | null;
         
-        if (decoded) {
+        if (decoded && decoded.sub) {
           const profile = this._normalizeProfile(decoded, this._idToken);
           return done(null, profile);
         }
       } catch (err) {
         // If decoding fails, fall back to userinfo endpoint
+        // Error is silently ignored to allow fallback
       }
     }
     
@@ -343,26 +378,30 @@ export class Strategy extends OAuth2Strategy {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this as any)._oauth2.get(this._userInfoURL, accessToken, (err: Error | null, body: string, res: unknown) => {
       if (err) {
-        const error = new Error('Failed to fetch user profile');
-        // Node.js Error.cause is available in Node 16.9+, but TypeScript types may not reflect this
-        // Using type assertion for compatibility
-        if ('cause' in Error.prototype || typeof (err as { cause?: unknown }).cause !== 'undefined') {
-          (error as { cause?: unknown }).cause = err;
-        }
+        const error = new Error('Failed to fetch user profile from Citizen iD userinfo endpoint');
+        setErrorCause(error, err);
+        return done(error);
+      }
+      
+      if (!body) {
+        const error = new Error('Empty response from Citizen iD userinfo endpoint');
         return done(error);
       }
       
       try {
         const json = JSON.parse(body) as CitizenIDUserInfo;
-        const profile = this._normalizeProfile(json, body);
         
+        // Validate that we have at least a sub claim (required for OIDC)
+        if (!json.sub) {
+          const error = new Error('Invalid user profile: missing required "sub" claim');
+          return done(error);
+        }
+        
+        const profile = this._normalizeProfile(json, body);
         done(null, profile);
       } catch (ex) {
-        const error = new Error('Failed to parse user profile');
-        // Node.js Error.cause is available in Node 16.9+, but TypeScript types may not reflect this
-        if ('cause' in Error.prototype || typeof (ex as { cause?: unknown }).cause !== 'undefined') {
-          (error as { cause?: unknown }).cause = ex;
-        }
+        const error = new Error('Failed to parse user profile response from Citizen iD');
+        setErrorCause(error, ex);
         done(error);
       }
     });
@@ -374,9 +413,15 @@ export class Strategy extends OAuth2Strategy {
    * @param {CitizenIDUserInfo} json - The user data from ID token or userinfo endpoint
    * @param {String} raw - The raw response
    * @return {CitizenIDProfile} Normalized profile
+   * @throws {Error} If the profile data is invalid (missing required 'sub' claim)
    * @api private
    */
   private _normalizeProfile(json: CitizenIDUserInfo, raw: string): CitizenIDProfile {
+    // Validate required fields
+    if (!json.sub) {
+      throw new Error('Invalid profile data: missing required "sub" claim');
+    }
+    
     const profile: CitizenIDProfile = {
       provider: 'citizenid',
       id: json.sub,

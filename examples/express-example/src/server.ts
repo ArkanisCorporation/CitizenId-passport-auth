@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import passport from 'passport';
 import session from 'express-session';
-import { Strategy as CitizenIDStrategy, CitizenIDProfile, Scopes, Endpoints, getEndpoints, PassportDoneCallback } from 'passport-citizenid';
+import { Strategy as CitizenIDStrategy, CitizenIDProfile, Scopes, Endpoints, getEndpoints, PassportDoneCallback, STANDARD_SCOPES, ALL_SCOPES, Roles } from 'passport-citizenid';
 import dotenv from 'dotenv';
 
 // Extend Express Request to include CitizenIDProfile
@@ -31,6 +31,9 @@ const app = express();
 // Determine the authority (dev or prod) and get endpoints
 const authority = process.env.CITIZENID_AUTHORITY || Endpoints.PRODUCTION.AUTHORITY;
 const endpoints = getEndpoints(authority);
+// Note: Additional endpoints available:
+// - endpoints.REVOKE: Token revocation endpoint
+// - endpoints.DISCOVERY: OpenID Connect discovery endpoint (.well-known/openid-configuration)
 
 passport.use(new CitizenIDStrategy({
     clientID: process.env.CITIZENID_CLIENT_ID!,
@@ -43,7 +46,10 @@ passport.use(new CitizenIDStrategy({
     // Using scope constants for type safety
     scope: [Scopes.OPENID, Scopes.PROFILE, Scopes.EMAIL, Scopes.ROLES, Scopes.OFFLINE_ACCESS]
     // Example with custom profile scopes:
-    // scope: [Scopes.OPENID, Scopes.PROFILE, Scopes.EMAIL, Scopes.ROLES, Scopes.OFFLINE_ACCESS, Scopes.DISCORD_PROFILE, Scopes.RSI_PROFILE]
+    // scope: [Scopes.OPENID, Scopes.PROFILE, Scopes.EMAIL, Scopes.ROLES, Scopes.OFFLINE_ACCESS, Scopes.DISCORD_PROFILE, Scopes.RSI_PROFILE, Scopes.GOOGLE_PROFILE, Scopes.TWITCH_PROFILE]
+    // Alternative: Use predefined scope arrays:
+    // scope: STANDARD_SCOPES  // [Scopes.OPENID, Scopes.PROFILE, Scopes.EMAIL]
+    // scope: ALL_SCOPES  // All available scopes
   },
   function verify(accessToken: string, refreshToken: string, profile: CitizenIDProfile, done: PassportDoneCallback<CitizenIDProfile>) {
     // In this example, the user's Citizen iD profile is returned to
@@ -59,6 +65,16 @@ passport.use(new CitizenIDStrategy({
     if (profile._customClaims) {
       console.log('Custom Claims:', JSON.stringify(profile._customClaims, null, 2));
     }
+    
+    // Example: Check user roles using role constants
+    const isIntegrator = profile.roles.includes(Roles.ACCOUNT_ROLE_INTEGRATOR);
+    const isVerified = profile.roles.includes(Roles.STATUS_VERIFIED);
+    const isCitizen = profile.roles.includes(Roles.ACCOUNT_TYPE_CITIZEN);
+    const isBanned = profile.roles.includes(Roles.STATUS_BANNED);
+    const isOrganization = profile.roles.includes(Roles.ACCOUNT_TYPE_ORGANIZATION);
+    const isPartner = profile.roles.includes(Roles.ACCOUNT_ROLE_PARTNER);
+    
+    console.log('Role checks:', { isIntegrator, isVerified, isCitizen, isBanned, isOrganization, isPartner });
     
     // Store tokens with the user profile for later use
     // Extend profile with tokens for this example (in production, store tokens separately)

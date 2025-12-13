@@ -2,49 +2,45 @@
 
 This directory contains example applications demonstrating how to use `passport-citizenid`.
 
-## Express.js Example
+For general documentation about `passport-citizenid`, including installation, configuration, and API reference, see the [main README](../README.md).
 
-The `express-example` directory contains a complete Express.js application with Citizen iD authentication (TypeScript source in `src/server.ts`).
+## Available Examples
 
-There is also a standalone example in `src/standalone-example.ts` that demonstrates a simpler setup.
+### Express.js Example
 
-### Setup
+The `express-example` directory contains a complete Express.js application with Citizen iD authentication.
 
-1. Install dependencies:
+**Features:**
+- Full Express.js integration
+- Session management
+- User profile display with EJS templates
+- Protected routes
+- Error handling
+
+See the [express-example README](./express-example/README.md) for setup and usage instructions.
+
+**Files:**
+- `src/server.ts` - Main Express application
+- `src/standalone-example.ts` - Simpler standalone example
+- `views/` - EJS templates for rendering
+
+### Getting Started
+
+1. Navigate to the example directory:
 ```bash
-npm install express express-session passport
+cd express-example
 ```
 
-2. Get your client credentials by registering an application with Citizen iD. See the [Citizen iD OAuth2 Documentation](https://docs.citizenid.space/integrator-guide/oauth2/) for instructions.
-
-3. Set environment variables:
+2. Install dependencies:
 ```bash
-export CITIZENID_CLIENT_ID="your-client-id"
-export CITIZENID_CLIENT_SECRET="your-client-secret"  # Optional for public clients
-export CALLBACK_URL="http://localhost:3000/auth/citizenid/callback"
-export SESSION_SECRET="your-session-secret"
+npm install
 ```
+
+3. Configure environment variables (see the example's README for details)
 
 4. Run the example:
 ```bash
-cd express-example
-npm install
 npm start
 ```
 
-5. Visit `http://localhost:3000` in your browser and click "Login with Citizen iD"
-
-### Features Demonstrated
-
-- Basic authentication flow
-- Session management
-- User profile display
-- Role-based access
-- Protected routes
-- Logout functionality
-
-### Notes
-
-- The example uses in-memory sessions. In production, use a proper session store (e.g., Redis, MongoDB).
-- User data is stored in the session. In production, store user data in a database.
-- The example includes basic HTML for demonstration. In production, use a proper templating engine or frontend framework.
+For detailed setup instructions, see the [express-example README](./express-example/README.md).

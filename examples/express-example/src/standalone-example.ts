@@ -18,7 +18,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import session from 'express-session';
 import passport from 'passport';
-import { Strategy as CitizenIDStrategy, CitizenIDProfile, Scopes, PassportDoneCallback } from 'passport-citizenid';
+import { Strategy as CitizenIDStrategy, CitizenIDProfile, Scopes, PassportDoneCallback, STANDARD_SCOPES, ALL_SCOPES, Roles } from 'passport-citizenid';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -57,6 +57,9 @@ passport.use(new CitizenIDStrategy({
     clientSecret: CITIZENID_CLIENT_SECRET, // Optional for public clients with PKCE
     callbackURL: CALLBACK_URL,
     scope: [Scopes.OPENID, Scopes.PROFILE, Scopes.EMAIL, Scopes.ROLES, Scopes.OFFLINE_ACCESS]
+    // Alternative: Use predefined scope arrays:
+    // scope: STANDARD_SCOPES  // [Scopes.OPENID, Scopes.PROFILE, Scopes.EMAIL]
+    // scope: ALL_SCOPES  // All available scopes including custom profile scopes
   },
   function(accessToken: string, refreshToken: string, profile: CitizenIDProfile, done: PassportDoneCallback<CitizenIDProfile>) {
     // In a real application, you would:
@@ -68,6 +71,16 @@ passport.use(new CitizenIDStrategy({
     console.log('User ID:', profile.id);
     console.log('User roles:', profile.roles);
     console.log('Refresh token available:', !!refreshToken);
+    
+    // Example: Check user roles using role constants
+    const isIntegrator = profile.roles.includes(Roles.ACCOUNT_ROLE_INTEGRATOR);
+    const isVerified = profile.roles.includes(Roles.STATUS_VERIFIED);
+    const isCitizen = profile.roles.includes(Roles.ACCOUNT_TYPE_CITIZEN);
+    const isBanned = profile.roles.includes(Roles.STATUS_BANNED);
+    const isOrganization = profile.roles.includes(Roles.ACCOUNT_TYPE_ORGANIZATION);
+    const isPartner = profile.roles.includes(Roles.ACCOUNT_ROLE_PARTNER);
+    
+    console.log('Role checks:', { isIntegrator, isVerified, isCitizen, isBanned, isOrganization, isPartner });
     
     // For this example, we'll just pass the profile
     // In production, you'd typically do:

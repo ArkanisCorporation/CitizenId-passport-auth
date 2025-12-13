@@ -231,12 +231,23 @@ passport.use(new CitizenIDStrategy(options,
 The package exports constants for scopes, endpoints, roles, and avatar claim keys:
 
 ```typescript
-import { Scopes, Endpoints, Roles, AvatarClaimKeys } from 'passport-citizenid';
+import { Scopes, Endpoints, Roles, AvatarClaimKeys, STANDARD_SCOPES, ALL_SCOPES, getEndpoints } from 'passport-citizenid';
 
 // Use scope constants
 passport.use(new CitizenIDStrategy({
   // ...
   scope: [Scopes.OPENID, Scopes.PROFILE, Scopes.EMAIL, Scopes.ROLES, Scopes.OFFLINE_ACCESS]
+}));
+
+// Use predefined scope arrays
+passport.use(new CitizenIDStrategy({
+  // ...
+  scope: STANDARD_SCOPES  // [Scopes.OPENID, Scopes.PROFILE, Scopes.EMAIL]
+}));
+
+passport.use(new CitizenIDStrategy({
+  // ...
+  scope: ALL_SCOPES  // All available scopes including custom profile scopes
 }));
 
 // Use endpoint constants for custom configuration
@@ -247,10 +258,19 @@ passport.use(new CitizenIDStrategy({
   userInfoURL: Endpoints.DEVELOPMENT.USERINFO,
 }));
 
+// Access additional endpoints (for token revocation, OIDC discovery, etc.)
+const endpoints = getEndpoints(Endpoints.PRODUCTION.AUTHORITY);
+console.log('Revoke endpoint:', endpoints.REVOKE);
+console.log('Discovery endpoint:', endpoints.DISCOVERY);
+
 // Check user roles using role constants
 function verify(accessToken, refreshToken, profile, done) {
   const isIntegrator = profile.roles.includes(Roles.ACCOUNT_ROLE_INTEGRATOR);
   const isVerified = profile.roles.includes(Roles.STATUS_VERIFIED);
+  const isBanned = profile.roles.includes(Roles.STATUS_BANNED);
+  const isCitizen = profile.roles.includes(Roles.ACCOUNT_TYPE_CITIZEN);
+  const isOrganization = profile.roles.includes(Roles.ACCOUNT_TYPE_ORGANIZATION);
+  const isPartner = profile.roles.includes(Roles.ACCOUNT_ROLE_PARTNER);
   // ...
 }
 
@@ -258,8 +278,15 @@ function verify(accessToken, refreshToken, profile, done) {
 if (profile._customClaims) {
   const discordAvatar = profile._customClaims[AvatarClaimKeys.DISCORD];
   const rsiAvatar = profile._customClaims[AvatarClaimKeys.RSI];
+  const googleAvatar = profile._customClaims[AvatarClaimKeys.GOOGLE];
+  const twitchAvatar = profile._customClaims[AvatarClaimKeys.TWITCH];
   // ...
 }
+
+// Helper constants for constructing custom claim keys
+import { CUSTOM_CLAIM_PREFIX, AVATAR_URL_SUFFIX } from 'passport-citizenid';
+// Custom claim keys follow the pattern: CUSTOM_CLAIM_PREFIX + provider + AVATAR_URL_SUFFIX
+// Example: CUSTOM_CLAIM_PREFIX + 'discord' + AVATAR_URL_SUFFIX = 'urn:user:discord:avatar:url'
 ```
 
 Available scope constants:
@@ -287,16 +314,12 @@ Available role constants:
 
 **Note:** Internal roles are reserved for Citizen iD staff and should not be used in your applications.
 
-For backward compatibility, legacy role format constants are also available:
-- `LegacyRoles.INTEGRATOR` - `CitizenId.Integrator` (legacy format)
-- `LegacyRoles.CITIZEN` - `CitizenId.AccountType.Citizen` (legacy format)
-
 ### Accessing User Roles
 
 The Citizen iD profile includes user roles when the `roles` scope is requested:
 
 ```javascript
-const { Scopes, Roles, LegacyRoles } = require('passport-citizenid');
+const { Scopes, Roles } = require('passport-citizenid');
 
 passport.use(new CitizenIDStrategy({
     clientID: process.env.CITIZENID_CLIENT_ID,
@@ -308,11 +331,9 @@ passport.use(new CitizenIDStrategy({
     console.log('User roles:', profile.roles);
     
     // Check if user has a specific role using constants
-    const isIntegrator = profile.roles.includes(Roles.ACCOUNT_ROLE_INTEGRATOR) || 
-                         profile.roles.includes(LegacyRoles.INTEGRATOR);
+    const isIntegrator = profile.roles.includes(Roles.ACCOUNT_ROLE_INTEGRATOR);
     const isVerified = profile.roles.includes(Roles.STATUS_VERIFIED);
-    const isCitizen = profile.roles.includes(Roles.ACCOUNT_TYPE_CITIZEN) ||
-                      profile.roles.includes(LegacyRoles.CITIZEN);
+    const isCitizen = profile.roles.includes(Roles.ACCOUNT_TYPE_CITIZEN);
     
     return done(null, profile);
   }
