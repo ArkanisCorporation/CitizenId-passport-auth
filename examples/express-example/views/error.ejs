@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error - Citizen iD</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 60px;
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+    
+    .error-icon {
+      font-size: 5em;
+      margin-bottom: 20px;
+    }
+    
+    h1 {
+      color: #dc3545;
+      margin-bottom: 20px;
+      font-size: 2em;
+    }
+    
+    .message {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+      line-height: 1.6;
+    }
+    
+    .error-details {
+      background: #f8f9fa;
+      border-left: 4px solid #dc3545;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: left;
+      border-radius: 4px;
+    }
+    
+    .error-details pre {
+      overflow-x: auto;
+      font-family: monospace;
+      font-size: 0.9em;
+      color: #333;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 12px 30px;
+      margin: 10px;
+      font-size: 1em;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      background: #667eea;
+      color: white;
+    }
+    
+    .btn:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="error-icon">⚠️</div>
+    <h1>Oops! Something went wrong</h1>
+    <p class="message"><%= message %></p>
+    
+    <% if (error && error.stack) { %>
+    <div class="error-details">
+      <pre><%= error.stack %></pre>
+    </div>
+    <% } %>
+    
+    <a href="/" class="btn">Go to Home</a>
+  </div>
+</body>
+</html>

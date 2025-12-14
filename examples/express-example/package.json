@@ -1,0 +1,36 @@
+{
+  "name": "passport-citizenid-example",
+  "version": "1.0.0",
+  "description": "Example Express.js application using passport-citizenid",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node dist/server.js",
+    "dev": "tsc --watch & nodemon dist/server.js",
+    "dev:ts": "ts-node-dev --respawn --transpile-only src/server.ts"
+  },
+  "keywords": [
+    "passport",
+    "citizenid",
+    "oauth2",
+    "example"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "passport": "^0.7.0",
+    "passport-citizenid": "file:../..",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/express-session": "^1.17.7",
+    "@types/node": "^20.10.0",
+    "nodemon": "^3.0.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
+  }
+}
