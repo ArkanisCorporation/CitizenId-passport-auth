@@ -1,0 +1,86 @@
+name: .NET Release
+
+concurrency:
+  group: "release-${{ github.ref }}"
+  cancel-in-progress: false
+
+permissions:
+  contents: write       # for publishing a GitHub release and creating release backpropagation PRs
+  issues: write         # for commenting on released issues
+  pull-requests: write  # for commenting on released pull requests and creating release backpropagation PRs
+  id-token: write       # to enable use of OIDC for trusted publishing and npm provenance
+
+env:
+  NODE_VERSION: 24
+  DRY_RUN: true
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      dry_run:
+        description: "Dry run?"
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      new_version:
+        description: "Newly published version"
+        value: ${{ jobs.release.outputs.new_version }}
+      new_tag:
+        description: "New tag"
+        value: ${{ jobs.release.outputs.new_tag }}
+      last_version:
+        description: "Previously published version"
+        value: ${{ jobs.release.outputs.last_version }}
+      last_tag:
+        description: "Previous version tag"
+        value: ${{ jobs.release.outputs.last_tag }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-tags: true
+
+      - uses: ./.github/workflows/_setup.yaml
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # determines whether a new version release is mandated
+      # if it is, publish scripts are run and new version is tagged and published
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v4
+        id: semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEBUG: ${{ inputs.dry_run && '*' || '' }}
+        with:
+          ci: ${{ ! inputs.dry_run }}
+          dry_run: ${{ inputs.dry_run }}
+          semantic_version: 24.2.3
+
+      - run: echo "New release - ${{ steps.semantic-release.outputs.new_release_version || 'no new release' }}"
+
+      - name: Setup Version Backpropagation PR
+        if: ${{ ! inputs.dry_run && steps.semantic-release.outputs.new_release_version && github.ref == 'refs/heads/release/stable' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR_URL=$(gh pr new --base ${{ github.event.repository.default_branch }} --head ${{ github.ref_name }} --title "Backpropagate release version to default branch: ${{ steps.semantic-release.outputs.new_release_version }}" --body "This is an automated post-release action." --label ci --label automated)
+          PR_NUMBER=${PR_URL##*/}
+          gh pr merge --merge --auto ${PR_URL}
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.PR_AUTOMATION_PAT }}" \
+            -H "Accept: application/vnd.github+json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/pulls/${PR_NUMBER}/reviews" \
+            -d '{"event":"APPROVE"}'
+
+    outputs:
+      new_version: ${{ steps.semantic-release.outputs.new_release_version }}
+      new_tag: ${{ steps.semantic-release.outputs.new_release_git_tag }}
+      last_version: ${{ steps.semantic-release.outputs.last_release_version }}
+      last_tag: ${{ steps.semantic-release.outputs.last_release_git_tag }}

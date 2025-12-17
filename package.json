@@ -19,9 +19,18 @@
   ],
   "scripts": {
     "build": "tsc",
+    "eslint": "eslint . --cache --cache-location .cache/eslint",
+    "eslint-fix": "eslint --cache --cache-location .cache/eslint --fix .",
+    "lint": "run-s eslint prettier markdown-lint",
+    "lint-fix": "run-s eslint-fix prettier-fix markdown-lint-fix",
+    "markdown-lint": "markdownlint-cli2",
+    "markdown-lint-fix": "markdownlint-cli2 --fix",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prettier": "prettier --cache --check '**/*.{ts,js,mjs,json,md,yaml}'",
+    "prettier-fix": "prettier --write --cache '**/*.{ts,js,mjs,json,md,yml}'",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "type-check": "tsc --noEmit"
   },
   "keywords": [
     "passport",
@@ -43,19 +52,32 @@
     "url": "https://github.com/ArkanisCorporation/CitizenId-passport-auth/issues"
   },
   "homepage": "https://github.com/ArkanisCorporation/CitizenId-passport-auth#readme",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "tag": "latest",
+    "provenance": true
+  },
   "dependencies": {
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "^9.0.3",
     "passport-oauth2": "^1.8.0"
   },
   "peerDependencies": {
     "passport": "^0.6.0 || ^0.7.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@stylistic/eslint-plugin": "^5.6.1",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20.10.0",
     "@types/passport": "^1.0.16",
     "@types/passport-oauth2": "^1.4.15",
-    "typescript": "^5.9.3"
+    "eslint": "^9.39.2",
+    "markdownlint-cli2": "^0.20.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.7.4",
+    "tsc": "^2.0.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.50.0"
   },
   "engines": {
     "node": ">= 14.0.0"
