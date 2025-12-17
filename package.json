@@ -1,5 +1,5 @@
 {
-  "name": "passport-citizenid",
+  "name": "@citizenid/passport-citizenid",
   "version": "1.0.0",
   "description": "Passport strategy for authenticating with Citizen iD using OAuth2 and OpenID Connect",
   "type": "module",
@@ -44,7 +44,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ArkanisCorporation/CitizenId-passport-auth.git"
+    "url": "git+https://github.com/ArkanisCorporation/CitizenId-passport-auth.git"
   },
   "bugs": {
     "url": "https://github.com/ArkanisCorporation/CitizenId-passport-auth/issues"
@@ -53,7 +53,7 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "tag": "latest",
-    "provenance": true
+    "access": "public"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.3",
