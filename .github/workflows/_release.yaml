@@ -62,7 +62,7 @@ jobs:
         with:
           ci: ${{ ! inputs.dry_run }}
           dry_run: ${{ inputs.dry_run }}
-          semantic_version: 24.2.3
+          semantic_version: 25.0.2
 
       - run: echo "New release - ${{ steps.semantic-release.outputs.new_release_version || 'no new release' }}"
 
