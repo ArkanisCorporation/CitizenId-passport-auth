@@ -325,6 +325,7 @@ import { CUSTOM_CLAIM_PREFIX, AVATAR_URL_SUFFIX } from 'passport-citizenid';
 ```
 
 Available scope constants:
+
 - `Scopes.OPENID` - Required for OpenID Connect
 - `Scopes.PROFILE` - Basic profile information
 - `Scopes.EMAIL` - Email address
@@ -336,6 +337,7 @@ Available scope constants:
 - `Scopes.RSI_PROFILE` - RSI (Roberts Space Industries) account information
 
 Available role constants:
+
 - `Roles.STATUS_VERIFIED` - Account has been linked with RSI and verified
 - `Roles.STATUS_BANNED` - Account has been suspended
 - `Roles.ACCOUNT_TYPE_ORGANIZATION` - Registered organization account

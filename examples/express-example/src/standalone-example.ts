@@ -30,21 +30,21 @@ const CITIZENID_CLIENT_SECRET = process.env.CITIZENID_CLIENT_SECRET;
 const CALLBACK_URL = process.env.CALLBACK_URL || `http://localhost:${PORT}/auth/citizenid/callback`;
 
 if (!CITIZENID_CLIENT_ID) {
-  console.error('Error: CITIZENID_CLIENT_ID environment variable is required');
-  process.exit(1);
+    console.error('Error: CITIZENID_CLIENT_ID environment variable is required');
+    process.exit(1);
 }
 
 const app = express();
 
 // Configure session middleware
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key-change-this-in-production',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
+    secret: process.env.SESSION_SECRET || 'your-secret-key-change-this-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
 }));
 
 // Initialize Passport
@@ -60,8 +60,8 @@ passport.use(new CitizenIDStrategy({
     // Alternative: Use predefined scope arrays:
     // scope: STANDARD_SCOPES  // [Scopes.OPENID, Scopes.PROFILE, Scopes.EMAIL]
     // scope: ALL_SCOPES  // All available scopes including custom profile scopes
-  },
-  function(accessToken: string, refreshToken: string, profile: CitizenIDProfile, done: PassportDoneCallback<CitizenIDProfile>) {
+},
+function(accessToken: string, refreshToken: string, profile: CitizenIDProfile, done: PassportDoneCallback<CitizenIDProfile>) {
     // In a real application, you would:
     // 1. Check if user exists in your database
     // 2. Create or update user record
@@ -91,27 +91,27 @@ passport.use(new CitizenIDStrategy({
     // }, done);
     
     return done(null, profile);
-  }
+}
 ));
 
 // Serialize user for session
 passport.serializeUser((user: CitizenIDProfile, done) => {
-  // In production, you'd typically serialize just the user ID
-  done(null, user);
+    // In production, you'd typically serialize just the user ID
+    done(null, user);
 });
 
 // Deserialize user from session
 passport.deserializeUser((user: CitizenIDProfile, done) => {
-  // In production, you'd fetch the user from your database
-  done(null, user);
+    // In production, you'd fetch the user from your database
+    done(null, user);
 });
 
 // Middleware to check if user is authenticated
 function isAuthenticated(req: Request, res: Response, next: NextFunction) {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.redirect('/login');
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/login');
 }
 
 // Extend Express Request to include CitizenIDProfile
@@ -123,9 +123,9 @@ declare global {
 
 // Routes
 app.get('/', (req: Request, res: Response) => {
-  if (req.isAuthenticated() && req.user) {
-    const user = req.user as CitizenIDProfile;
-    res.send(`
+    if (req.isAuthenticated() && req.user) {
+        const user = req.user as CitizenIDProfile;
+        res.send(`
       <!DOCTYPE html>
       <html>
         <head>
@@ -163,13 +163,13 @@ app.get('/', (req: Request, res: Response) => {
         </body>
       </html>
     `);
-  } else {
-    res.redirect('/login');
-  }
+    } else {
+        res.redirect('/login');
+    }
 });
 
 app.get('/login', (req: Request, res: Response) => {
-  res.send(`
+    res.send(`
     <!DOCTYPE html>
     <html>
       <head>
@@ -191,61 +191,61 @@ app.get('/login', (req: Request, res: Response) => {
 
 // Initiate authentication
 app.get('/auth/citizenid',
-  passport.authenticate('citizenid', {
+    passport.authenticate('citizenid', {
     // Optional: Add custom authorization parameters
     // nonce: 'random-nonce-value',
     // prompt: 'login', // Force re-authentication
-  })
+    })
 );
 
 // Handle callback
 app.get('/auth/citizenid/callback',
-  passport.authenticate('citizenid', { 
-    failureRedirect: '/login',
-    failureMessage: true
-  }),
-  (req: Request, res: Response) => {
+    passport.authenticate('citizenid', { 
+        failureRedirect: '/login',
+        failureMessage: true
+    }),
+    (req: Request, res: Response) => {
     // Successful authentication
-    res.redirect('/');
-  }
+        res.redirect('/');
+    }
 );
 
 // Logout route
 app.get('/logout', (req: Request, res: Response) => {
-  req.logout((err) => {
-    if (err) {
-      console.error('Logout error:', err);
-    }
-    res.redirect('/');
-  });
+    req.logout((err) => {
+        if (err) {
+            console.error('Logout error:', err);
+        }
+        res.redirect('/');
+    });
 });
 
 // Protected route example
 app.get('/protected', isAuthenticated, (req: Request, res: Response) => {
-  const user = req.user as CitizenIDProfile;
-  res.json({
-    message: 'This is a protected route',
-    user: {
-      id: user.id,
-      username: user.username,
-      displayName: user.displayName,
-      roles: user.roles
-    }
-  });
+    const user = req.user as CitizenIDProfile;
+    res.json({
+        message: 'This is a protected route',
+        user: {
+            id: user.id,
+            username: user.username,
+            displayName: user.displayName,
+            roles: user.roles
+        }
+    });
 });
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error('Error:', err);
-  res.status(500).send('Internal Server Error');
+    console.error('Error:', err);
+    res.status(500).send('Internal Server Error');
 });
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`\n🚀 Server running on http://localhost:${PORT}`);
-  console.log(`\n📋 Configuration:`);
-  console.log(`   Client ID: ${CITIZENID_CLIENT_ID}`);
-  console.log(`   Callback URL: ${CALLBACK_URL}`);
-  console.log(`   PKCE: Enabled (default)`);
-  console.log(`\n🔗 Visit http://localhost:${PORT} to test authentication\n`);
+    console.log(`\n🚀 Server running on http://localhost:${PORT}`);
+    console.log(`\n📋 Configuration:`);
+    console.log(`   Client ID: ${CITIZENID_CLIENT_ID}`);
+    console.log(`   Callback URL: ${CALLBACK_URL}`);
+    console.log(`   PKCE: Enabled (default)`);
+    console.log(`\n🔗 Visit http://localhost:${PORT} to test authentication\n`);
 });

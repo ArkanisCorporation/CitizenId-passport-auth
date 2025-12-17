@@ -11,6 +11,7 @@ For general documentation about `passport-citizenid`, including installation, co
 The `express-example` directory contains a complete Express.js application with Citizen iD authentication.
 
 **Features:**
+
 - Full Express.js integration
 - Session management
 - User profile display with EJS templates
@@ -20,6 +21,7 @@ The `express-example` directory contains a complete Express.js application with 
 See the [express-example README](./express-example/README.md) for setup and usage instructions.
 
 **Files:**
+
 - `src/server.ts` - Main Express application
 - `src/standalone-example.ts` - Simpler standalone example
 - `views/` - EJS templates for rendering
@@ -27,18 +29,21 @@ See the [express-example README](./express-example/README.md) for setup and usag
 ### Getting Started
 
 1. Navigate to the example directory:
+
 ```bash
 cd express-example
 ```
 
-2. Install dependencies:
+1. Install dependencies:
+
 ```bash
 npm install
 ```
 
-3. Configure environment variables (see the example's README for details)
+1. Configure environment variables (see the example's README for details)
 
-4. Run the example:
+2. Run the example:
+
 ```bash
 npm start
 ```

@@ -1,4 +1,4 @@
-﻿name: Setup Node and pnpm
+name: Setup Node and pnpm
 
 on:
   workflow_call:

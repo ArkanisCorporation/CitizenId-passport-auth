@@ -43,6 +43,7 @@ SESSION_SECRET=change-this-to-a-random-secret
 To get your Citizen iD OAuth2 credentials, see the [Getting Client Credentials](../README.md#getting-client-credentials) section in the main README.
 
 You'll need to:
+
 1. Create or log into your Citizen iD account
 2. Register a new application
 3. Set the callback URL to: `http://localhost:3000/auth/citizenid/callback`
@@ -51,21 +52,24 @@ You'll need to:
 ### 4. Run the Application
 
 **Production:**
+
 ```bash
 npm start
 ```
 
 **Development (with TypeScript compilation and auto-reload):**
+
 ```bash
 npm run dev
 ```
 
 **Development (direct TypeScript execution, faster):**
+
 ```bash
 npm run dev:ts
 ```
 
-The application will be available at: http://localhost:3000
+The application will be available at: <http://localhost:3000>
 
 ## Project Structure
 
@@ -134,6 +138,7 @@ Ensure the callback URL in your `.env` file matches the one registered in your C
 ### Session not persisting
 
 Check that:
+
 1. `express-session` is properly configured
 2. Cookie settings are appropriate for your environment
 3. Session secret is set

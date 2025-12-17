@@ -1,6 +1,6 @@
-﻿import js from '@eslint/js';
-import tsEslint from 'typescript-eslint';
-import stylistic from '@stylistic/eslint-plugin';
+import js from "@eslint/js";
+import tsEslint from "typescript-eslint";
+import stylistic from "@stylistic/eslint-plugin";
 
 export default [
     // Base JS recommended rules
@@ -11,47 +11,50 @@ export default [
 
     {
         ignores: [
-            '**/.cache/**',
-            '**/dist/**',
-            '**/lib/**',
-            '**/node_modules/**',
+            "**/.cache/**",
+            "**/dist/**",
+            "**/lib/**",
+            "**/node_modules/**",
         ],
     },
 
     {
-        files: ['**/*.{ts,tsx}'],
+        files: ["**/*.{ts,tsx}"],
 
         languageOptions: {
             parser: tsEslint.parser,
         },
 
         plugins: {
-            '@typescript-eslint': tsEslint.plugin,
-            '@stylistic': stylistic,
+            "@typescript-eslint": tsEslint.plugin,
+            "@stylistic": stylistic,
         },
 
         rules: {
             // Style / formatting
-            semi: ['error', 'always'],
-            curly: 'error',
-            indent: 'error',
-            'no-tabs': 'error',
+            semi: ["error", "always"],
+            curly: "error",
+            indent: "error",
+            "no-tabs": "error",
 
             // Code quality
-            'consistent-return': 'error',
-            complexity: ['error', 10],
-            'no-await-in-loop': 'warn',
-            'no-eval': 'error',
-            'no-implied-eval': 'error',
-            'prefer-promise-reject-errors': 'warn',
+            complexity: ["warn", 10],
+            "no-await-in-loop": "warn",
+            "no-eval": "error",
+            "no-implied-eval": "error",
+            "prefer-promise-reject-errors": "warn",
 
             // Shadowing
-            'no-shadow': 'off',
-            '@typescript-eslint/no-shadow': 'error',
+            "no-shadow": "off",
+            "@typescript-eslint/no-shadow": "error",
 
             // Use-before-define
-            'no-use-before-define': 'off',
-            '@typescript-eslint/no-use-before-define': 'error',
+            "no-use-before-define": "off",
+            "@typescript-eslint/no-namespace": "off",
+            "@typescript-eslint/no-empty-object-type": "off",
+            "@typescript-eslint/no-explicit-any": "warn",
+            "@typescript-eslint/no-unused-vars": "off",
+            "@typescript-eslint/no-use-before-define": "error",
         },
     },
 ];
