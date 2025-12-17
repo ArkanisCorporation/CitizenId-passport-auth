@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: ./.github/workflows/_setup.yaml
+      - uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -75,7 +75,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: ./.github/workflows/_setup.yaml
+      - uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -105,7 +105,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: ./.github/workflows/_setup.yaml
+      - uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -124,7 +124,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: ./.github/workflows/_setup.yaml
+      - uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
 
