@@ -25,7 +25,7 @@
     "lint-fix": "run-s eslint-fix markdown-lint-fix",
     "markdown-lint": "markdownlint-cli2",
     "markdown-lint-fix": "markdownlint-cli2 --fix",
-    "prepare": "run-s type-check",
+    "prepare": "run-s build",
     "prepublishOnly": "run-s lint build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "type-check": "tsc --noEmit"
