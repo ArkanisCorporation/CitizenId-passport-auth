@@ -50,7 +50,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Restore ESLint cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: .cache/eslint
           key: eslint-${{ runner.os }}-${{ hashFiles('package-lock.yaml', 'package.json') }}
@@ -62,7 +62,7 @@ jobs:
 
       - name: Save ESLint cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: .cache/eslint
           key: eslint-${{ runner.os }}-${{ hashFiles('package-lock.yaml', 'package.json') }}-${{ github.run_id }}
